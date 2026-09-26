@@ -95,9 +95,9 @@ class PackageOps(context: Context) {
         val (accepted, detail) = Privileged.uninstall(appContext, packageName, allUsers)
         val gone = waitUntilGone(packageName, timeoutMs = if (accepted) 6_000L else 1_200L)
         return when {
-            gone && accepted -> UninstallResult(true, "已受理", "$detail（已复查：设备上不存在）")
-            gone -> UninstallResult(true, "无需卸载", "$detail（已复查：设备上本就无此包）")
-            else -> UninstallResult(false, "未受理", detail)
+            gone && accepted -> UninstallResult(true, "Aceptado", "$detail (verificado: ya no existe en el dispositivo)")
+            gone -> UninstallResult(true, "No hace falta desinstalar", "$detail (verificado: el paquete ya no estaba en el dispositivo)")
+            else -> UninstallResult(false, "No aceptado", detail)
         }
     }
 

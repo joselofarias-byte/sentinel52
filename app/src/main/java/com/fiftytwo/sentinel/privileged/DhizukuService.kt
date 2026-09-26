@@ -81,13 +81,13 @@ object DhizukuService {
      * 「受理」不等于删掉——客户端会再查一次，见 PackageOps。
      */
     fun uninstall(context: Context, packageName: String, allUsers: Boolean): Pair<Boolean, String> {
-        if (!isBinderAlive(context)) return false to "Dhizuku 未激活或未安装"
-        if (!hasPermission()) return false to "未获得 Dhizuku 授权"
+        if (!isBinderAlive(context)) return false to "Dhizuku no está activado o instalado"
+        if (!hasPermission()) return false to "No se obtuvo autorización de Dhizuku"
 
-        val service = ensureBound(context) ?: return false to "绑定 Dhizuku 用户服务失败（$BIND_TIMEOUT_MS ms 超时）"
+        val service = ensureBound(context) ?: return false to "No se pudo enlazar el servicio de usuario de Dhizuku (tiempo agotado tras $BIND_TIMEOUT_MS ms)"
         return runCatching {
             val accepted = service.uninstall(packageName, allUsers)
-            if (accepted) true to "已在 Dhizuku 进程内发起（${service.whoAmI()}）" else false to "用户服务拒绝执行"
+            if (accepted) true to "Solicitud iniciada dentro del proceso de Dhizuku (${service.whoAmI()})" else false to "El servicio de usuario rechazó la operación"
         }.getOrElse { t ->
             remote = null
             false to (t.message?.takeIf { it.isNotBlank() } ?: t.javaClass.simpleName)

@@ -60,7 +60,7 @@ class MonitorService : Service() {
     private val installReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             val pkg = intent?.data?.schemeSpecificPart.orEmpty()
-            scope.launch { scan(reason = "安装广播 ${intent?.action?.substringAfterLast('.')}（$pkg）") }
+            scope.launch { scan(reason = "Evento de instalación ${intent?.action?.substringAfterLast('.')} ($pkg)") }
         }
     }
 
@@ -149,7 +149,7 @@ class MonitorService : Service() {
         if (text == lastErrorText && now - lastErrorAt < ERROR_THROTTLE_MS) return
         lastErrorText = text
         lastErrorAt = now
-        SentinelStore.log(EventKind.ERROR, detail = "扫描出错：$text")
+        SentinelStore.log(EventKind.ERROR, detail = "Error de análisis: $text")
     }
 
     private suspend fun scan(reason: String) {
@@ -212,7 +212,7 @@ class MonitorService : Service() {
             val skippedNoBackend = mutableListOf<String>()
             for (pkg in targets) {
                 if (reportedDetections.add(pkg)) {
-                    SentinelStore.log(EventKind.DETECTED, pkg, "命中规则（触发：$reason）")
+                    SentinelStore.log(EventKind.DETECTED, pkg, "Regla coincidente (origen: $reason)")
                 }
 
                 if (state.dryRun) {
@@ -231,11 +231,11 @@ class MonitorService : Service() {
                     // 用户可见的提醒交到本轮结束后的 handleDegradedNotice
                     skippedNoBackend.add(pkg)
                     if (reportedNoBackend.add(pkg)) {
-                        val who = status.kind?.label ?: "所有特权后端"
+                        val who = status.kind?.label ?: "todos los backends privilegiados"
                         SentinelStore.log(
                             EventKind.FAILED,
                             pkg,
-                            "$who 未就绪（${stateName(status.state)}），本轮跳过",
+                            "$who no está listo (${stateName(status.state)}); se omite esta ronda",
                         )
                     }
                     continue
@@ -256,7 +256,7 @@ class MonitorService : Service() {
                 }
             }
 
-            // 三个后端都没就绪、命中却一个没卸 → 常驻通知改文案 + 弹一次提醒
+            // 三个后端都没Listo、命中却一个没卸 → 常驻通知改文案 + 弹一次提醒
             handleDegradedNotice(skippedNoBackend)
         } finally {
             scanLock.unlock()
@@ -285,10 +285,10 @@ class MonitorService : Service() {
     }
 
     private fun stateName(state: PrivilegedState): String = when (state) {
-        PrivilegedState.NOT_INSTALLED -> "未安装"
-        PrivilegedState.NOT_RUNNING -> "未激活"
-        PrivilegedState.NO_PERMISSION -> "未授权"
-        PrivilegedState.READY -> "就绪"
+        PrivilegedState.NOT_INSTALLED -> "No instalado"
+        PrivilegedState.NOT_RUNNING -> "No activado"
+        PrivilegedState.NO_PERMISSION -> "Sin autorización"
+        PrivilegedState.READY -> "Listo"
     }
 
     private fun updateNotification(degraded: Int = 0) {
@@ -311,7 +311,7 @@ class MonitorService : Service() {
     }
 
     /**
-     * 三个后端都没就绪时的降级提示：常驻通知换文案，并额外弹一次「命中但没能卸载」的提醒。
+     * 三个后端都没Listo时的降级提示：常驻通知换文案，并额外弹一次「命中但没能卸载」的提醒。
      *
      * 判定在 [DegradedNoticePolicy]（纯逻辑，有单测）：轮询默认 3 秒一轮，不节流就是刷屏——
      * 同一批包 10 分钟内只提醒一次，集合变了立刻提醒，一个都不跳时把提醒收回并把状态清空。
@@ -340,7 +340,7 @@ class MonitorService : Service() {
 
         degradedFingerprint = fingerprint
         lastDegradedAlertAt = now
-        val who = Privileged.status.kind?.label?.let { "$it 未就绪" } ?: "三个后端均未安装或未就绪"
+        val who = Privileged.status.kind?.label?.let { "$it no está listo" } ?: "Los tres backends están ausentes o no están listos"
         alertShown = true
         Notifier.alert(
             this,
