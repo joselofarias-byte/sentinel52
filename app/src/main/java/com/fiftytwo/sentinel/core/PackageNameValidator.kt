@@ -26,12 +26,12 @@ object PackageNameValidator {
     /** 给校验失败时的提示语用：返回第一条不满足的原因。 */
     fun describeProblem(pattern: String): String? {
         val p = normalize(pattern)
-        if (p.isEmpty()) return "包名不能为空"
+        if (p.isEmpty()) return "El nombre del paquete no puede estar vacío"
         if (isValidPattern(p)) return null
-        if (RuleMatcher.isWildcard(p) && p.dropLast(2).isEmpty()) return "「.*」前需补全包名，例如 com.foo.*"
+        if (RuleMatcher.isWildcard(p) && p.dropLast(2).isEmpty()) return "Antes de «.*» debes indicar un paquete completo, por ejemplo com.foo.*"
         val parts = p.split('.')
-        if (parts.size < 2) return "包名至少需两段，例如 com.example.app"
+        if (parts.size < 2) return "El paquete debe tener al menos dos segmentos, por ejemplo com.example.app"
         val bad = parts.firstOrNull { it.isEmpty() || !SEGMENT.matches(it) }
-        return "「${bad.orEmpty()}」不是合法的包名段（仅允许字母、数字与下划线，且不能以数字开头）"
+        return "«${bad.orEmpty()}» no es un segmento de paquete válido (solo letras, números y guion bajo; no puede comenzar con un número)"
     }
 }
