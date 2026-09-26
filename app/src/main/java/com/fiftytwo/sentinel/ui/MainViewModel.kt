@@ -110,7 +110,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         val problem = PackageNameValidator.describeProblem(raw)
         if (problem != null) return problem
         val added = SentinelStore.addRule(raw, label)
-        return if (added) null else "「${raw.trim()}」已在名单中"
+        return if (added) null else "«${raw.trim()}» ya está en la lista"
     }
 
     /** 编辑已有规则（包名 + 应用名）。返回 null 表示改好了，否则是要显示的提示文案。 */
@@ -118,7 +118,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         val problem = PackageNameValidator.describeProblem(newPattern)
         if (problem != null) return problem
         val ok = SentinelStore.updateRule(oldPattern, newPattern, label)
-        return if (ok) null else "「${newPattern.trim()}」已在名单中"
+        return if (ok) null else "«${newPattern.trim()}» ya está en la lista"
     }
 
     fun removeRule(pattern: String) = SentinelStore.removeRule(pattern)
