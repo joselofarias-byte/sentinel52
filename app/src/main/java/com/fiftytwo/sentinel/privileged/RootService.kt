@@ -116,7 +116,7 @@ object RootService {
     /** 真跑一次 `su -c id`；**可能弹 su 管理器的授权框**，所以只在用户明确要求时调。 */
     fun requestRoot(context: Context): Pair<Boolean, String> {
         val su = suExecutable(context)
-            ?: return false to "未检测到 su，也未安装 su 管理器（Magisk / KernelSU / APatch）"
+            ?: return false to "No se detectó su ni un gestor de su (Magisk / KernelSU / APatch)"
 
         val result = exec(su, "id", REQUEST_TIMEOUT_MS)
         val granted = result.ok && result.output.contains("uid=0")
@@ -127,9 +127,9 @@ object RootService {
         return if (granted) {
             val who = result.output.lineSequence().firstOrNull()?.trim() ?: "uid=0"
             val via = managerLabel(context)?.let { "$it · " } ?: ""
-            true to "已获得 root 权限（$via$who）"
+            true to "Acceso root obtenido ($via$who)"
         } else {
-            false to "su 未返回 root：${result.toString().ifBlank { "被拒绝或超时" }}"
+            false to "su no devolvió root: ${result.toString().ifBlank { "rechazado o tiempo agotado" }}"
         }
     }
 
@@ -137,8 +137,8 @@ object RootService {
 
     /** 卸载。返回 (是否受理, 说明)——「受理」不等于删掉，调用方会再查一次。 */
     fun uninstall(context: Context, packageName: String, allUsers: Boolean): Pair<Boolean, String> {
-        val su = suExecutable(context) ?: return false to "缺少 root 条件（既无 su，也未安装 su 管理器）"
-        if (!SentinelStore.isRootGranted()) return false to "尚未授权（请点击「申请 Root 授权」）"
+        val su = suExecutable(context) ?: return false to "No hay condiciones para Root (sin su ni gestor de su instalado)"
+        if (!SentinelStore.isRootGranted()) return false to "Aún sin autorización (pulsa «Solicitar permiso Root»)"
 
         val command = UninstallCommand.build(packageName, allUsers)
         val result = exec(su, command, REQUEST_TIMEOUT_MS)
@@ -169,12 +169,12 @@ object RootService {
         if (!process.waitFor(timeoutMs, TimeUnit.MILLISECONDS)) {
             process.destroyForcibly()
             reader.join(200)
-            ShellResult(-1, "超时 ${timeoutMs}ms（su 授权弹窗可能尚未处理）")
+            ShellResult(-1, "Tiempo agotado tras ${timeoutMs} ms (puede que el diálogo de autorización de su aún no se haya respondido)")
         } else {
             reader.join(500)
             ShellResult(process.exitValue(), output.toString().trim())
         }
     } catch (t: Throwable) {
-        ShellResult(-1, "启动进程失败 $suPath：${t.javaClass.simpleName}: ${t.message}")
+        ShellResult(-1, "No se pudo iniciar el proceso $suPath: ${t.javaClass.simpleName}: ${t.message}")
     }
 }
