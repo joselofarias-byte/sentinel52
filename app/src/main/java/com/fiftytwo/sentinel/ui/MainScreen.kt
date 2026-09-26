@@ -593,14 +593,14 @@ private fun backendSummary(status: PrivilegedStatus): String = when {
         "Dhizuku tiene permisos de propietario del dispositivo y ejecuta la desinstalación en su propio proceso; es silenciosa y no requiere volver a autorizar tras reiniciar."
 
     status.state == PrivilegedState.READY ->
-        "Stellar Listo（身份：${status.uidMode}），可执行卸载。"
+        "Stellar está listo (identidad: ${status.uidMode}) y puede ejecutar desinstalaciones."
 
     status.kind == null ->
-        "未检测到 Root、Dhizuku 或 Stellar。请任选其一准备Listo：Root（Magisk / KernelSU 等）、" +
+        "No se detectó Root, Dhizuku ni Stellar. Prepara al menos uno: Root (Magisk / KernelSU, etc.)," +
             "Dhizuku (debe ser propietario del dispositivo) o Stellar (debe tener el servicio iniciado)."
 
     else ->
-        "优先使用 ${status.kind.label}，但该后端尚未Listo，详见下列各项状态。"
+        "Se prioriza ${status.kind.label}, pero todavía no está listo. Revisa el estado de cada backend abajo."
 }
 
 private fun backendRole(kind: BackendKind): String = when (kind) {
@@ -619,7 +619,7 @@ private fun backendHint(probe: BackendProbe): String = when (probe.state) {
     PrivilegedState.NOT_INSTALLED, PrivilegedState.NOT_RUNNING ->
         when (probe.kind) {
             BackendKind.ROOT -> "No se detectó su (Magisk / KernelSU / APatch no instalado)"
-            BackendKind.DHIZUKU -> "尚未设为Propietario del dispositivo"
+            BackendKind.DHIZUKU -> "Aún no es propietario del dispositivo"
             BackendKind.STELLAR -> "El servicio no está ejecutándose"
         }
 
@@ -647,7 +647,7 @@ private fun MonitorCard(
         subtitle = when {
             !state.monitoring -> "Detenida"
             state.dryRun -> "Activa · solo registrar"
-            !backendReady -> "运行中 · 无可用Backend privilegiado"
+            !backendReady -> "Activa · sin backend privilegiado disponible"
             else -> "Activa · desinstalar al coincidir"
         },
         accent = if (state.monitoring) cs.secondary else cs.onSurfaceVariant,
@@ -655,13 +655,13 @@ private fun MonitorCard(
     ) {
         if (state.monitoring && !backendReady) {
             WarnBanner(
-                "当前没有可用的Backend privilegiado：即使Coincidencias规则也不会执行卸载，仅在Registro中记录，并发送一次通知提醒。",
+                "No hay un backend privilegiado disponible: las coincidencias solo se registrarán y se mostrará una notificación, sin desinstalar.",
             )
         }
 
         InfoRow(
             title = "Solo registrar (modo prueba)",
-            desc = "Coincidencias时只写入Registro、不执行卸载；确认名单无误后再Cerrar。",
+            desc = "Al coincidir una regla solo se escribe en el registro; no se desinstala. Desactívalo cuando hayas verificado la lista.",
             trailing = { Switch(checked = state.dryRun, onCheckedChange = onDryRun, colors = switchColors()) },
         )
         Hairline()
@@ -716,12 +716,12 @@ private fun MonitorCard(
         Hairline()
 
         Button(onClick = onCheckNow, modifier = Modifier.fillMaxWidth()) {
-            Text(if (state.monitoring) "Comprobar ahora" else "开始Vigilancia并检查一次")
+            Text(if (state.monitoring) "Comprobar ahora" else "Iniciar vigilancia y comprobar")
         }
     }
 }
 
-// ---------------------------------------------------------------- Vigilancia名单
+// ---------------------------------------------------------------- Lista vigilada
 
 @Composable
 private fun RulesCard(
@@ -739,7 +739,7 @@ private fun RulesCard(
 ) {
     val cs = MaterialTheme.colorScheme
     SectionCard(
-        title = "Vigilancia名单",
+        title = "Lista vigilada",
         subtitle = "${rules.count { it.enabled }} / ${rules.size} reglas activadas",
         trailing = {
             TextButton(onClick = onShowProtect, contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)) {
@@ -784,7 +784,7 @@ private fun RulesCard(
         }
 
         if (rules.isEmpty()) {
-            EmptyHint("名单为空。AñadirPaquete并开启Vigilancia后，该应用被安装时将自动卸载。")
+            EmptyHint("La lista está vacía. Añade un paquete y activa la vigilancia para desinstalarlo automáticamente cuando se instale.")
         }
 
         rules.forEachIndexed { index, rule ->
@@ -820,7 +820,7 @@ private fun RulesCard(
                     }
                     if (UninstallPlanner.isProtected(rule.pattern)) {
                         Text(
-                            text = "位于Lista protegida，不会被执行卸载",
+                            text = "Está en la lista protegida y no se desinstalará",
                             style = MaterialTheme.typography.bodySmall,
                             color = cs.error,
                         )
@@ -864,7 +864,7 @@ private fun StatsCard(stats: UninstallStats, logCount: Int, labels: Map<String, 
             StatDivider()
             StatCell(stats.today.toString(), "Hoy", cs.primary, Modifier.weight(1f))
             StatDivider()
-            StatCell(stats.session.toString(), "本次Vigilancia", cs.onSurface, Modifier.weight(1f))
+            StatCell(stats.session.toString(), "Esta sesión", cs.onSurface, Modifier.weight(1f))
             StatDivider()
             StatCell(
                 value = stats.failed.toString(),
@@ -984,7 +984,7 @@ private fun LogPage(
                     text = if (filter == LogFilter.ALL) {
                         "${events.size} entradas"
                     } else {
-                        "${events.size} entradas · 当前筛选 ${shown.size} 条"
+                        "${events.size} entradas · ${shown.size} en el filtro actual"
                     },
                     style = MaterialTheme.typography.bodyMedium,
                     color = cs.onSurfaceVariant,
@@ -1147,28 +1147,28 @@ private fun HelpDialog(onDismiss: () -> Unit) {
                     heading = "1. Root (preferido)",
                     lines = listOf(
                         "1. El dispositivo debe tener acceso root (Magisk / KernelSU / APatch, etc.).",
-                        "2. 返回本应用点击「Solicitar permiso Root」，并在 su 管理器弹窗中允许。",
+                        "2. Vuelve a esta app, pulsa «Solicitar permiso Root» y acepta en el gestor de su.",
                         "3. La autorización se guarda. Si la revocas en el gestor de su, la app volverá automáticamente al estado sin permiso.",
                         "uid 0 tiene los máximos privilegios y puede desinstalar apps del sistema.",
                     ),
                 )
                 HelpSection(
-                    heading = "二、Dhizuku（Propietario del dispositivo，无需 root）",
+                    heading = "2. Dhizuku (propietario del dispositivo, sin root)",
                     lines = listOf(
                         "1. Instala Dhizuku (paquete com.rosan.dhizuku).",
-                        "2. 通过 adb 将其设为Propietario del dispositivo：",
+                        "2. Con ADB establécelo como propietario del dispositivo:",
                         "adb shell dpm set-device-owner com.rosan.dhizuku/.server.DhizukuDAReceiver",
-                        "（要求设备上未登录任何账号；设置成功后 Dhizuku 即为Propietario del dispositivo）",
-                        "3. 返回本应用点击「Solicitar permiso」，并在 Dhizuku 弹窗中允许。",
+                        "(El dispositivo no debe tener cuentas configuradas; al completarse, Dhizuku será el propietario del dispositivo.)",
+                        "3. Vuelve a esta app, pulsa «Solicitar permiso» y acepta en Dhizuku.",
                         "Este método no depende de un servicio residente y sigue funcionando tras reiniciar sin volver a autorizar.",
                     ),
                 )
                 HelpSection(
-                    heading = "三、Stellar（Identidad Shell）",
+                    heading = "3. Stellar (identidad Shell)",
                     lines = listOf(
                         "1. Instala el gestor Stellar (paquete roro.stellar.manager).",
                         "2. Ábrelo e inicia el servicio siguiendo las instrucciones. En Android 11+ puedes emparejar por «Depuración inalámbrica» o usar un PC.",
-                        "3. 返回本应用点击「Solicitar permiso」，选择「始终允许」。",
+                        "3. Vuelve a esta app, pulsa «Solicitar permiso» y elige «Permitir siempre».",
                         "Tras reiniciar el servicio hay que autorizar de nuevo. Usa identidad ADB / Shell (uid 2000): puede desinstalar apps normales, no apps del sistema.",
                     ),
                 )
@@ -1214,7 +1214,7 @@ private fun RuleEditorDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Editar规则") },
+        title = { Text("Editar regla") },
         confirmButton = {
             TextButton(
                 onClick = {
@@ -1286,18 +1286,18 @@ private fun AppPickerDialog(
         onDismissRequest = onDismiss,
         confirmButton = { TextButton(onClick = onDismiss) { Text("Cerrar") } },
         dismissButton = { TextButton(onClick = onRefresh) { Text("Actualizar") } },
-        title = { Text("选择要Vigilancia的应用") },
+        title = { Text("Elegir aplicación a vigilar") },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 OutlinedTextField(
                     value = query,
                     onValueChange = { query = it },
-                    label = { Text("搜索应用名或Paquete") },
+                    label = { Text("Buscar por nombre o paquete") },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
                 Text(
-                    text = if (loading) "Leyendo aplicaciones instaladas…" else "共 ${filtered.size} 个应用，点击「Añadir」加入名单",
+                    text = if (loading) "Leyendo aplicaciones instaladas…" else "${filtered.size} aplicaciones; pulsa «Añadir» para incorporarla a la lista",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
