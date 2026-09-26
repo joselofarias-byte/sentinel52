@@ -53,7 +53,7 @@ data class PrivilegedStatus(
     /** 两个后端各自的探测结果，界面按它逐个展示（[kind] 只是「当前用哪个」）。 */
     val probes: List<BackendProbe> = emptyList(),
 ) {
-    val kindLabel: String get() = kind?.label ?: "无可用后端"
+    val kindLabel: String get() = kind?.label ?: "Sin backend disponible"
     val uidMode: String get() = PrivilegedStateResolver.describeUid(uid)
 
     fun probeOf(kind: BackendKind): BackendProbe? = probes.firstOrNull { it.kind == kind }
@@ -89,7 +89,7 @@ object PrivilegedStateResolver {
         0 -> "Root"
         2000 -> "ADB / Shell"
         1000 -> "System"
-        -1 -> "未知"
+        -1 -> "Desconocido"
         else -> "UID $uid"
     }
 }
