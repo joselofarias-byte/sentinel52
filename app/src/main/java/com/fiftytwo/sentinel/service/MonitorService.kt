@@ -340,7 +340,7 @@ class MonitorService : Service() {
 
         degradedFingerprint = fingerprint
         lastDegradedAlertAt = now
-        val who = Privileged.status.kind?.label?.let { "$it 未Listo" } ?: "三个后端均No instalado或未Listo"
+        val who = Privileged.status.kind?.label?.let { "$it no está listo" } ?: "Los tres backends están ausentes o no están listos"
         alertShown = true
         Notifier.alert(
             this,
