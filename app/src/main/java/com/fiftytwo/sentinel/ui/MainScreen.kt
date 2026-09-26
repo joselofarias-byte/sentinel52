@@ -113,10 +113,10 @@ fun MainScreen(viewModel: MainViewModel = viewModel()) {
         if (showPicker) viewModel.loadApps()
     }
 
-    // 包名 → 应用名。日志和统计上把包名配成人看得懂的名字
+    // Paquete → 应用名。Registro和统计上把Paquete配成人看得懂的名字
     val labels = remember(state.rules) { state.rules.associate { it.pattern to it.label } }
 
-    // 系统返回键：在日志页要退回主页面，而不是直接退出应用
+    // 系统返回键：在Registro页要退回主页面，而不是直接退出应用
     BackHandler(enabled = screen == AppScreen.Log) { screen = AppScreen.Main }
 
     if (screen == AppScreen.Log) {
@@ -187,8 +187,8 @@ fun MainScreen(viewModel: MainViewModel = viewModel()) {
             )
 
             Text(
-                text = "卸载优先交由已授权的后端执行：Root（su，uid 0）→ Dhizuku（设备所有者）" +
-                    "→ Stellar（Shell 身份）。定时轮询与安装广播双通道触发，命中即卸载。",
+                text = "La desinstalación se ejecuta primero con un backend autorizado: Root (su, uid 0) → Dhizuku (propietario del dispositivo)" +
+                    "→ Stellar (identidad Shell). Se vigila por sondeo periódico y eventos de instalación; al coincidir una regla, se desinstala.",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = 2.dp, bottom = 10.dp),
@@ -203,8 +203,8 @@ fun MainScreen(viewModel: MainViewModel = viewModel()) {
     if (showProtectList) {
         AlertDialog(
             onDismissRequest = { showProtectList = false },
-            confirmButton = { TextButton(onClick = { showProtectList = false }) { Text("关闭") } },
-            title = { Text("内置保护名单") },
+            confirmButton = { TextButton(onClick = { showProtectList = false }) { Text("Cerrar") } },
+            title = { Text("Lista de protección integrada") },
             text = {
                 Column(
                     modifier = Modifier
@@ -213,7 +213,7 @@ fun MainScreen(viewModel: MainViewModel = viewModel()) {
                     verticalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
                     Text(
-                        text = "以下包名即使命中规则也不会被执行卸载，用于避免系统组件与特权组件被误删。",
+                        text = "Los siguientes paquetes nunca se desinstalan aunque coincidan con una regla, para evitar eliminar por error componentes del sistema o privilegiados.",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -244,7 +244,7 @@ fun MainScreen(viewModel: MainViewModel = viewModel()) {
         )
     }
 
-    // 编辑已有规则（改包名 / 改应用名）。校验与去重走的是和新增同一条路
+    // Editar已有规则（改Paquete / 改应用名）。校验与去重走的是和新增同一条路
     editing?.let { rule ->
         RuleEditorDialog(
             rule = rule,
@@ -264,13 +264,13 @@ fun MainScreen(viewModel: MainViewModel = viewModel()) {
 private fun Header() {
     Column(modifier = Modifier.padding(top = 6.dp, bottom = 2.dp)) {
         Text(
-            text = "包名哨兵",
+            text = "Sentinela de paquetes",
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold,
         )
         Spacer(modifier = Modifier.height(4.dp))
         Text(
-            text = "指定包名的应用一经安装，即刻自动卸载",
+            text = "Desinstala automáticamente una aplicación en cuanto se instala si su paquete está vigilado",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -285,7 +285,7 @@ private fun cardBorder(): BorderStroke {
     return BorderStroke(1.dp, cs.outline.copy(alpha = if (lightMode) 1f else 0.5f))
 }
 
-/** 开关配色：Material 默认的关闭态轨道在浅色下几乎融进卡片，这里给它描一道边。 */
+/** 开关配色：Material 默认的Cerrar态轨道在浅色下几乎融进卡片，这里给它描一道边。 */
 @Composable
 private fun switchColors(): SwitchColors = SwitchDefaults.colors(
     checkedThumbColor = MaterialTheme.colorScheme.onPrimary,
@@ -362,7 +362,7 @@ private fun StatusPill(text: String, tint: Color, dot: Boolean = true) {
     }
 }
 
-/** 小标签，用在标题行里（例如「当前使用」）。 */
+/** 小标签，用在标题行里（例如「En uso」）。 */
 @Composable
 private fun TagChip(text: String, tint: Color) {
     Surface(shape = RoundedCornerShape(50), color = tint.copy(alpha = 0.14f)) {
@@ -470,7 +470,7 @@ private fun ChoiceChip(selected: Boolean, label: String, onClick: () -> Unit) {
     }
 }
 
-// ---------------------------------------------------------------- 特权后端
+// ---------------------------------------------------------------- Backend privilegiado
 
 @Composable
 private fun BackendCard(
@@ -484,16 +484,16 @@ private fun BackendCard(
     val ready = status?.state == PrivilegedState.READY
 
     SectionCard(
-        title = "特权后端",
-        subtitle = status?.let { backendSummary(it) } ?: "正在探测 Root / Dhizuku / Stellar…",
+        title = "Backend privilegiado",
+        subtitle = status?.let { backendSummary(it) } ?: "Detectando Root / Dhizuku / Stellar…",
         accent = if (ready) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.primary,
         trailing = {
             StatusPill(
                 text = when {
-                    status == null -> "检测中"
-                    ready -> "已就绪"
-                    status.kind == null -> "均未安装"
-                    else -> "${status.kindLabel} 未就绪"
+                    status == null -> "Detectando"
+                    ready -> "Listo"
+                    status.kind == null -> "Ninguno instalado"
+                    else -> "${status.kindLabel} no está listo"
                 },
                 tint = when {
                     status == null -> MaterialTheme.colorScheme.onSurfaceVariant
@@ -505,7 +505,7 @@ private fun BackendCard(
     ) {
         val probes = status?.probes.orEmpty()
         if (probes.isEmpty()) {
-            EmptyHint("尚未获取探测结果，请点击「重新检测」。")
+            EmptyHint("Aún no hay resultados. Pulsa «Volver a detectar».")
         }
 
         probes.forEachIndexed { index, probe ->
@@ -520,10 +520,10 @@ private fun BackendCard(
 
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             FilledTonalButton(onClick = onRefresh, contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)) {
-                Text("重新检测")
+                Text("Volver a detectar")
             }
             TextButton(onClick = onHelp, contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp)) {
-                Text("配置说明")
+                Text("Cómo configurarlo")
             }
         }
     }
@@ -560,16 +560,16 @@ private fun BackendRow(
         }
         Spacer(modifier = Modifier.width(8.dp))
         when {
-            // 就绪的行只在「正在用哪一个」上给一颗实心标签，避免每行都写一遍「已就绪」
-            probe.state == PrivilegedState.READY && active -> StatusPill("当前使用", cs.primary, dot = false)
-            probe.state == PrivilegedState.READY -> StatusPill("就绪", cs.secondary, dot = false)
+            // Listo的行只在「正在用哪一个」上给一颗实心标签，避免每行都写一遍「Listo」
+            probe.state == PrivilegedState.READY && active -> StatusPill("En uso", cs.primary, dot = false)
+            probe.state == PrivilegedState.READY -> StatusPill("Listo", cs.secondary, dot = false)
 
             probe.state == PrivilegedState.NO_PERMISSION ->
                 Button(
                     onClick = onRequest,
                     contentPadding = PaddingValues(horizontal = 14.dp, vertical = 8.dp),
                 ) {
-                    Text(if (probe.kind == BackendKind.ROOT) "申请 Root 授权" else "申请授权")
+                    Text(if (probe.kind == BackendKind.ROOT) "Solicitar permiso Root" else "Solicitar permiso")
                 }
 
             // Root 没有可打开的管理器界面：su 授权框由 su 管理器自己弹出，因此这一行不给按钮
@@ -578,56 +578,56 @@ private fun BackendRow(
                     onClick = onOpenApp,
                     contentPadding = PaddingValues(horizontal = 14.dp, vertical = 8.dp),
                 ) {
-                    Text("打开管理器")
+                    Text("Abrir gestor")
                 }
         }
     }
 }
 
-/** 卡片副标题：优先说明当前使用的后端，没有可用后端时说明缺什么。 */
+/** 卡片副标题：优先说明En uso的后端，没有可用后端时说明缺什么。 */
 private fun backendSummary(status: PrivilegedStatus): String = when {
     status.state == PrivilegedState.READY && status.kind == BackendKind.ROOT ->
-        "已由 Root（su，uid 0）执行卸载：可卸载系统应用，且无需常驻服务。"
+        "Las desinstalaciones se ejecutan con Root (su, uid 0): puede quitar apps del sistema y no necesita un servicio residente."
 
     status.state == PrivilegedState.READY && status.kind == BackendKind.DHIZUKU ->
-        "Dhizuku 已取得设备所有者权限，卸载由它在自身进程内执行；静默，重启后无需重新授权。"
+        "Dhizuku tiene permisos de propietario del dispositivo y ejecuta la desinstalación en su propio proceso; es silenciosa y no requiere volver a autorizar tras reiniciar."
 
     status.state == PrivilegedState.READY ->
-        "Stellar 已就绪（身份：${status.uidMode}），可执行卸载。"
+        "Stellar Listo（身份：${status.uidMode}），可执行卸载。"
 
     status.kind == null ->
-        "未检测到 Root、Dhizuku 或 Stellar。请任选其一准备就绪：Root（Magisk / KernelSU 等）、" +
-            "Dhizuku（需设为设备所有者）或 Stellar（需启动服务）。"
+        "未检测到 Root、Dhizuku 或 Stellar。请任选其一准备Listo：Root（Magisk / KernelSU 等）、" +
+            "Dhizuku (debe ser propietario del dispositivo) o Stellar (debe tener el servicio iniciado)."
 
     else ->
-        "优先使用 ${status.kind.label}，但该后端尚未就绪，详见下列各项状态。"
+        "优先使用 ${status.kind.label}，但该后端尚未Listo，详见下列各项状态。"
 }
 
 private fun backendRole(kind: BackendKind): String = when (kind) {
-    BackendKind.ROOT -> "超级用户"
-    BackendKind.DHIZUKU -> "设备所有者"
-    BackendKind.STELLAR -> "Shell 身份"
+    BackendKind.ROOT -> "Superusuario"
+    BackendKind.DHIZUKU -> "Propietario del dispositivo"
+    BackendKind.STELLAR -> "Identidad Shell"
 }
 
 private fun backendHint(probe: BackendProbe): String = when (probe.state) {
     PrivilegedState.READY -> when (probe.kind) {
-        BackendKind.ROOT -> "已授权（uid 0）"
-        BackendKind.DHIZUKU -> "已授权，重启后仍有效"
-        BackendKind.STELLAR -> "已授权，服务运行中"
+        BackendKind.ROOT -> "Autorizado (uid 0)"
+        BackendKind.DHIZUKU -> "Autorizado; sigue válido tras reiniciar"
+        BackendKind.STELLAR -> "Autorizado; servicio en ejecución"
     }
 
     PrivilegedState.NOT_INSTALLED, PrivilegedState.NOT_RUNNING ->
         when (probe.kind) {
-            BackendKind.ROOT -> "未检测到 su（未安装 Magisk / KernelSU / APatch）"
-            BackendKind.DHIZUKU -> "尚未设为设备所有者"
-            BackendKind.STELLAR -> "服务未运行"
+            BackendKind.ROOT -> "No se detectó su (Magisk / KernelSU / APatch no instalado)"
+            BackendKind.DHIZUKU -> "尚未设为Propietario del dispositivo"
+            BackendKind.STELLAR -> "El servicio no está ejecutándose"
         }
 
     PrivilegedState.NO_PERMISSION ->
-        if (probe.kind == BackendKind.ROOT) "待授权：点击右侧按钮，在 su 管理器中允许" else "待授权"
+        if (probe.kind == BackendKind.ROOT) "Pendiente de autorización: pulsa el botón y permite el acceso en el gestor de su" else "Pendiente de autorización"
 }
 
-// ---------------------------------------------------------------- 监控
+// ---------------------------------------------------------------- Vigilancia
 
 @Composable
 private fun MonitorCard(
@@ -643,51 +643,51 @@ private fun MonitorCard(
 ) {
     val cs = MaterialTheme.colorScheme
     SectionCard(
-        title = "监控",
+        title = "Vigilancia",
         subtitle = when {
-            !state.monitoring -> "已停止"
-            state.dryRun -> "运行中 · 仅记录"
-            !backendReady -> "运行中 · 无可用特权后端"
-            else -> "运行中 · 命中即卸载"
+            !state.monitoring -> "Detenida"
+            state.dryRun -> "Activa · solo registrar"
+            !backendReady -> "运行中 · 无可用Backend privilegiado"
+            else -> "Activa · desinstalar al coincidir"
         },
         accent = if (state.monitoring) cs.secondary else cs.onSurfaceVariant,
         trailing = { Switch(checked = state.monitoring, onCheckedChange = onToggle, colors = switchColors()) },
     ) {
         if (state.monitoring && !backendReady) {
             WarnBanner(
-                "当前没有可用的特权后端：即使命中规则也不会执行卸载，仅在日志中记录，并发送一次通知提醒。",
+                "当前没有可用的Backend privilegiado：即使Coincidencias规则也不会执行卸载，仅在Registro中记录，并发送一次通知提醒。",
             )
         }
 
         InfoRow(
-            title = "仅记录（演练模式）",
-            desc = "命中时只写入日志、不执行卸载；确认名单无误后再关闭。",
+            title = "Solo registrar (modo prueba)",
+            desc = "Coincidencias时只写入Registro、不执行卸载；确认名单无误后再Cerrar。",
             trailing = { Switch(checked = state.dryRun, onCheckedChange = onDryRun, colors = switchColors()) },
         )
         Hairline()
         InfoRow(
-            title = "对所有用户卸载",
-            desc = "同时卸载多用户与工作资料中的同一应用（DELETE_ALL_USERS）。",
+            title = "Desinstalar para todos los usuarios",
+            desc = "Desinstala también la misma app de otros usuarios y perfiles de trabajo (DELETE_ALL_USERS).",
             trailing = { Switch(checked = state.allUsers, onCheckedChange = onAllUsers, colors = switchColors()) },
         )
         Hairline()
         InfoRow(
-            title = "忽略电池优化",
+            title = "Ignorar optimización de batería",
             desc = if (batteryExempt) {
-                "已加入白名单，后台轮询不受 Doze 限制。"
+                "Añadido a la lista permitida; el sondeo en segundo plano no queda limitado por Doze."
             } else {
-                "未加入白名单：后台可能被限流，轮询间隔会被拉长。"
+                "No está en la lista permitida: Android puede limitar la actividad en segundo plano y alargar el intervalo."
             },
             descTint = if (batteryExempt) null else cs.error,
             trailing = {
                 if (batteryExempt) {
-                    StatusPill("已加入", cs.secondary, dot = false)
+                    StatusPill("Añadido", cs.secondary, dot = false)
                 } else {
                     OutlinedButton(
                         onClick = onRequestBattery,
                         contentPadding = PaddingValues(horizontal = 14.dp, vertical = 8.dp),
                     ) {
-                        Text("加入白名单")
+                        Text("Añadir")
                     }
                 }
             },
@@ -696,9 +696,9 @@ private fun MonitorCard(
 
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text("检查间隔", style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
+                Text("Intervalo de comprobación", style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
                 Text(
-                    text = "${state.intervalMs / 1000} 秒",
+                    text = "${state.intervalMs / 1000} s",
                     style = MaterialTheme.typography.labelLarge,
                     color = cs.primary,
                 )
@@ -707,7 +707,7 @@ private fun MonitorCard(
                 listOf(1_000L, 3_000L, 5_000L, 10_000L, 30_000L).forEach { ms ->
                     ChoiceChip(
                         selected = state.intervalMs == ms,
-                        label = "${ms / 1000} 秒",
+                        label = "${ms / 1000} s",
                         onClick = { onInterval(ms) },
                     )
                 }
@@ -716,12 +716,12 @@ private fun MonitorCard(
         Hairline()
 
         Button(onClick = onCheckNow, modifier = Modifier.fillMaxWidth()) {
-            Text(if (state.monitoring) "立即执行一次检查" else "开始监控并检查一次")
+            Text(if (state.monitoring) "Comprobar ahora" else "开始Vigilancia并检查一次")
         }
     }
 }
 
-// ---------------------------------------------------------------- 监控名单
+// ---------------------------------------------------------------- Vigilancia名单
 
 @Composable
 private fun RulesCard(
@@ -739,27 +739,27 @@ private fun RulesCard(
 ) {
     val cs = MaterialTheme.colorScheme
     SectionCard(
-        title = "监控名单",
-        subtitle = "${rules.count { it.enabled }} / ${rules.size} 条规则已启用",
+        title = "Vigilancia名单",
+        subtitle = "${rules.count { it.enabled }} / ${rules.size} reglas activadas",
         trailing = {
             TextButton(onClick = onShowProtect, contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)) {
-                Text("保护名单")
+                Text("Lista protegida")
             }
         },
     ) {
         OutlinedTextField(
             value = input,
             onValueChange = onInputChange,
-            label = { Text("包名，例如 com.example.app") },
-            supportingText = { Text("支持末尾通配符：com.tencent.* 仅匹配其子包") },
+            label = { Text("Paquete, por ejemplo com.example.app") },
+            supportingText = { Text("Admite comodín final: com.tencent.* solo coincide con sus subpaquetes") },
             singleLine = true,
             modifier = Modifier.fillMaxWidth(),
         )
         OutlinedTextField(
             value = name,
             onValueChange = onNameChange,
-            label = { Text("应用名（可选）") },
-            supportingText = { Text("只影响显示，方便认人；从「已安装应用」里选会自动填上") },
+            label = { Text("Nombre de la app (opcional)") },
+            supportingText = { Text("Solo afecta a la visualización; al elegir una app instalada se completa automáticamente") },
             singleLine = true,
             modifier = Modifier.fillMaxWidth(),
         )
@@ -776,15 +776,15 @@ private fun RulesCard(
                 enabled = input.isNotBlank(),
                 contentPadding = PaddingValues(horizontal = 18.dp, vertical = 8.dp),
             ) {
-                Text("添加")
+                Text("Añadir")
             }
             OutlinedButton(onClick = onPick, contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)) {
-                Text("选择已安装应用")
+                Text("Elegir app instalada")
             }
         }
 
         if (rules.isEmpty()) {
-            EmptyHint("名单为空。添加包名并开启监控后，该应用被安装时将自动卸载。")
+            EmptyHint("名单为空。AñadirPaquete并开启Vigilancia后，该应用被安装时将自动卸载。")
         }
 
         rules.forEachIndexed { index, rule ->
@@ -792,7 +792,7 @@ private fun RulesCard(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Column(modifier = Modifier.weight(1f)) {
                     if (rule.label.isNotEmpty()) {
-                        // 配了应用名就把名字当主标题，包名退到第二行小字
+                        // 配了应用名就把名字当主标题，Paquete退到第二行小字
                         Text(
                             text = rule.label,
                             style = MaterialTheme.typography.bodyMedium,
@@ -820,7 +820,7 @@ private fun RulesCard(
                     }
                     if (UninstallPlanner.isProtected(rule.pattern)) {
                         Text(
-                            text = "位于保护名单，不会被执行卸载",
+                            text = "位于Lista protegida，不会被执行卸载",
                             style = MaterialTheme.typography.bodySmall,
                             color = cs.error,
                         )
@@ -832,43 +832,43 @@ private fun RulesCard(
                     onClick = { onEdit(rule) },
                     contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp),
                 ) {
-                    Text("编辑")
+                    Text("Editar")
                 }
             }
         }
     }
 }
 
-// ---------------------------------------------------------------- 卸载统计
+// ---------------------------------------------------------------- Estadísticas de desinstalación
 
 @Composable
 private fun StatsCard(stats: UninstallStats, logCount: Int, labels: Map<String, String>, onOpenLog: () -> Unit) {
     val cs = MaterialTheme.colorScheme
     SectionCard(
-        title = "卸载统计",
+        title = "Estadísticas de desinstalación",
         subtitle = when {
-            stats.total == 0 -> "尚未执行过卸载"
+            stats.total == 0 -> "Todavía no se realizó ninguna desinstalación"
             stats.lastAt > 0 -> {
                 val who = labels[stats.lastPackage]?.takeIf { it.isNotEmpty() } ?: stats.lastPackage
-                "最近一次 ${shortTime(stats.lastAt)} · $who"
+                "Última: ${shortTime(stats.lastAt)} · $who"
             }
-            else -> "累计已卸载 ${stats.total} 个"
+            else -> "Total desinstalado: ${stats.total}"
         },
         accent = cs.secondary,
         trailing = {
-            if (stats.failed > 0) StatusPill("失败 ${stats.failed}", cs.error)
+            if (stats.failed > 0) StatusPill("Fallos ${stats.failed}", cs.error)
         },
     ) {
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-            StatCell(stats.total.toString(), "累计卸载", cs.secondary, Modifier.weight(1f))
+            StatCell(stats.total.toString(), "Total", cs.secondary, Modifier.weight(1f))
             StatDivider()
-            StatCell(stats.today.toString(), "今日", cs.primary, Modifier.weight(1f))
+            StatCell(stats.today.toString(), "Hoy", cs.primary, Modifier.weight(1f))
             StatDivider()
-            StatCell(stats.session.toString(), "本次监控", cs.onSurface, Modifier.weight(1f))
+            StatCell(stats.session.toString(), "本次Vigilancia", cs.onSurface, Modifier.weight(1f))
             StatDivider()
             StatCell(
                 value = stats.failed.toString(),
-                label = "失败",
+                label = "Fallos",
                 tint = if (stats.failed > 0) cs.error else cs.onSurfaceVariant,
                 modifier = Modifier.weight(1f),
             )
@@ -885,12 +885,12 @@ private fun StatsCard(stats: UninstallStats, logCount: Int, labels: Map<String, 
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = "查看日志",
+                    text = "Ver registro",
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Medium,
                 )
                 Text(
-                    text = if (logCount == 0) "暂无记录" else "共 $logCount 条",
+                    text = if (logCount == 0) "Sin registros" else "$logCount entradas",
                     style = MaterialTheme.typography.bodySmall,
                     color = cs.onSurfaceVariant,
                 )
@@ -930,7 +930,7 @@ private fun StatDivider() {
 private fun shortTime(at: Long): String =
     SimpleDateFormat("MM-dd HH:mm", Locale.US).format(Date(at))
 
-// ---------------------------------------------------------------- 日志页
+// ---------------------------------------------------------------- Registro页
 
 @Composable
 private fun LogPage(
@@ -961,7 +961,7 @@ private fun LogPage(
                     onClick = onBack,
                     contentPadding = PaddingValues(horizontal = 6.dp, vertical = 6.dp),
                 ) {
-                    Text("‹ 返回")
+                    Text("‹ Volver")
                 }
                 Spacer(modifier = Modifier.weight(1f))
                 TextButton(
@@ -969,22 +969,22 @@ private fun LogPage(
                     enabled = events.isNotEmpty(),
                     contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
                 ) {
-                    Text("清空")
+                    Text("Vaciar")
                 }
             }
 
             Column {
                 Text(
-                    text = "日志",
+                    text = "Registro",
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = if (filter == LogFilter.ALL) {
-                        "共 ${events.size} 条"
+                        "${events.size} entradas"
                     } else {
-                        "共 ${events.size} 条 · 当前筛选 ${shown.size} 条"
+                        "${events.size} entradas · 当前筛选 ${shown.size} 条"
                     },
                     style = MaterialTheme.typography.bodyMedium,
                     color = cs.onSurfaceVariant,
@@ -1016,7 +1016,7 @@ private fun LogPage(
                     verticalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
                     if (shown.isEmpty()) {
-                        EmptyHint(if (events.isEmpty()) "暂无记录。" else "当前筛选下没有记录。")
+                        EmptyHint(if (events.isEmpty()) "Sin registros。" else "No hay registros con el filtro actual.")
                     }
                     shown.forEachIndexed { index, event ->
                         if (index > 0) Hairline()
@@ -1032,13 +1032,13 @@ private fun LogPage(
     }
 }
 
-/** 日志筛选分组。 */
+/** Registro筛选分组。 */
 private enum class LogFilter(val label: String) {
-    ALL("全部"),
-    UNINSTALLED("已卸载"),
-    DETECTED("命中"),
-    FAILED("失败"),
-    OTHER("其它");
+    ALL("Todos"),
+    UNINSTALLED("Desinstaladas"),
+    DETECTED("Coincidencias"),
+    FAILED("Fallos"),
+    OTHER("Otros");
 
     fun match(kind: EventKind): Boolean = when (this) {
         ALL -> true
@@ -1068,7 +1068,7 @@ private fun LogRow(event: SentinelEvent, time: String, label: String? = null) {
         Column(modifier = Modifier.weight(1f)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 if (event.packageName.isNotEmpty()) {
-                    // 规则里配了应用名就一起显示：名字用正文字体，包名用等宽小字
+                    // 规则里配了应用名就一起显示：名字用正文字体，Paquete用等宽小字
                     Text(
                         text = if (label.isNullOrBlank()) {
                             AnnotatedString(event.packageName)
@@ -1134,8 +1134,8 @@ private fun kindGlyph(kind: EventKind): String = when (kind) {
 private fun HelpDialog(onDismiss: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        confirmButton = { TextButton(onClick = onDismiss) { Text("关闭") } },
-        title = { Text("特权后端配置说明") },
+        confirmButton = { TextButton(onClick = onDismiss) { Text("Cerrar") } },
+        title = { Text("Backend privilegiadoCómo configurarlo") },
         text = {
             Column(
                 modifier = Modifier
@@ -1144,37 +1144,37 @@ private fun HelpDialog(onDismiss: () -> Unit) {
                 verticalArrangement = Arrangement.spacedBy(14.dp),
             ) {
                 HelpSection(
-                    heading = "一、Root（首选）",
+                    heading = "1. Root (preferido)",
                     lines = listOf(
-                        "1. 设备已获取 root 权限（Magisk / KernelSU / APatch 等）。",
-                        "2. 返回本应用点击「申请 Root 授权」，并在 su 管理器弹窗中允许。",
-                        "3. 授权结果保存在本应用内，无需重复授权；若在 su 管理器中撤销授权，本应用会自动降级为未授权状态。",
-                        "uid 0 权限最高，可卸载系统应用。",
+                        "1. El dispositivo debe tener acceso root (Magisk / KernelSU / APatch, etc.).",
+                        "2. 返回本应用点击「Solicitar permiso Root」，并在 su 管理器弹窗中允许。",
+                        "3. La autorización se guarda. Si la revocas en el gestor de su, la app volverá automáticamente al estado sin permiso.",
+                        "uid 0 tiene los máximos privilegios y puede desinstalar apps del sistema.",
                     ),
                 )
                 HelpSection(
-                    heading = "二、Dhizuku（设备所有者，无需 root）",
+                    heading = "二、Dhizuku（Propietario del dispositivo，无需 root）",
                     lines = listOf(
-                        "1. 安装 Dhizuku（包名 com.rosan.dhizuku）。",
-                        "2. 通过 adb 将其设为设备所有者：",
+                        "1. Instala Dhizuku (paquete com.rosan.dhizuku).",
+                        "2. 通过 adb 将其设为Propietario del dispositivo：",
                         "adb shell dpm set-device-owner com.rosan.dhizuku/.server.DhizukuDAReceiver",
-                        "（要求设备上未登录任何账号；设置成功后 Dhizuku 即为设备所有者）",
-                        "3. 返回本应用点击「申请授权」，并在 Dhizuku 弹窗中允许。",
-                        "该方式不依赖常驻服务，重启后依然有效，无需重新授权。",
+                        "（要求设备上未登录任何账号；设置成功后 Dhizuku 即为Propietario del dispositivo）",
+                        "3. 返回本应用点击「Solicitar permiso」，并在 Dhizuku 弹窗中允许。",
+                        "Este método no depende de un servicio residente y sigue funcionando tras reiniciar sin volver a autorizar.",
                     ),
                 )
                 HelpSection(
-                    heading = "三、Stellar（Shell 身份）",
+                    heading = "三、Stellar（Identidad Shell）",
                     lines = listOf(
-                        "1. 安装 Stellar 管理器（包名 roro.stellar.manager）。",
-                        "2. 打开并按引导启动服务：Android 11 及以上可使用「无线调试」配对，也可连接电脑执行其提示的命令。",
-                        "3. 返回本应用点击「申请授权」，选择「始终允许」。",
-                        "服务重启后需重新授权；身份为 ADB / Shell（uid 2000），可卸载普通应用，无法卸载系统应用。",
+                        "1. Instala el gestor Stellar (paquete roro.stellar.manager).",
+                        "2. Ábrelo e inicia el servicio siguiendo las instrucciones. En Android 11+ puedes emparejar por «Depuración inalámbrica» o usar un PC.",
+                        "3. 返回本应用点击「Solicitar permiso」，选择「始终允许」。",
+                        "Tras reiniciar el servicio hay que autorizar de nuevo. Usa identidad ADB / Shell (uid 2000): puede desinstalar apps normales, no apps del sistema.",
                     ),
                 )
                 HelpSection(
-                    heading = "选择顺序",
-                    lines = listOf("三个后端均可用时，按 Root → Dhizuku → Stellar 的顺序选择。"),
+                    heading = "Orden de selección",
+                    lines = listOf("Si los tres están disponibles, se elige Root → Dhizuku → Stellar."),
                 )
             }
         },
@@ -1200,7 +1200,7 @@ private fun HelpSection(heading: String, lines: List<String>) {
     }
 }
 
-/** 编辑一条规则：改包名、改应用名，或直接删掉。校验与去重跟新增走同一条路。 */
+/** Editar一条规则：改Paquete、改应用名，或直接删掉。校验与去重跟新增走同一条路。 */
 @Composable
 private fun RuleEditorDialog(
     rule: WatchRule,
@@ -1214,7 +1214,7 @@ private fun RuleEditorDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("编辑规则") },
+        title = { Text("Editar规则") },
         confirmButton = {
             TextButton(
                 onClick = {
@@ -1222,12 +1222,12 @@ private fun RuleEditorDialog(
                     if (error == null) onDismiss() else problem = error
                 },
             ) {
-                Text("保存")
+                Text("Guardar")
             }
         },
         dismissButton = {
             TextButton(onClick = onDelete) {
-                Text("删除规则", color = MaterialTheme.colorScheme.error)
+                Text("Eliminar regla", color = MaterialTheme.colorScheme.error)
             }
         },
         text = {
@@ -1238,16 +1238,16 @@ private fun RuleEditorDialog(
                         pattern = it
                         problem = null
                     },
-                    label = { Text("包名") },
-                    supportingText = { Text("支持末尾通配符，例如 com.tencent.*") },
+                    label = { Text("Paquete") },
+                    supportingText = { Text("Admite comodín final, por ejemplo com.tencent.*") },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
                 OutlinedTextField(
                     value = label,
                     onValueChange = { label = it },
-                    label = { Text("应用名（可选）") },
-                    supportingText = { Text("只影响显示，方便认人") },
+                    label = { Text("Nombre de la app (opcional)") },
+                    supportingText = { Text("Solo afecta a la visualización") },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
@@ -1284,20 +1284,20 @@ private fun AppPickerDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        confirmButton = { TextButton(onClick = onDismiss) { Text("关闭") } },
-        dismissButton = { TextButton(onClick = onRefresh) { Text("刷新") } },
-        title = { Text("选择要监控的应用") },
+        confirmButton = { TextButton(onClick = onDismiss) { Text("Cerrar") } },
+        dismissButton = { TextButton(onClick = onRefresh) { Text("Actualizar") } },
+        title = { Text("选择要Vigilancia的应用") },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 OutlinedTextField(
                     value = query,
                     onValueChange = { query = it },
-                    label = { Text("搜索应用名或包名") },
+                    label = { Text("搜索应用名或Paquete") },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
                 Text(
-                    text = if (loading) "正在读取已安装应用…" else "共 ${filtered.size} 个应用，点击「添加」加入名单",
+                    text = if (loading) "Leyendo aplicaciones instaladas…" else "共 ${filtered.size} 个应用，点击「Añadir」加入名单",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -1327,20 +1327,20 @@ private fun AppPickerDialog(
                                     },
                                 )
                                 Text(
-                                    text = app.packageName + if (app.isSystem) "  ·  系统应用" else "",
+                                    text = app.packageName + if (app.isSystem) "  ·  app del sistema" else "",
                                     style = MaterialTheme.typography.bodySmall,
                                     fontFamily = FontFamily.Monospace,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
                             }
                             if (added) {
-                                TagChip("已在名单", MaterialTheme.colorScheme.onSurfaceVariant)
+                                TagChip("Ya está en la lista", MaterialTheme.colorScheme.onSurfaceVariant)
                             } else {
                                 TextButton(
                                     onClick = { onPick(app.packageName, app.label) },
                                     contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
                                 ) {
-                                    Text("添加")
+                                    Text("Añadir")
                                 }
                             }
                         }
