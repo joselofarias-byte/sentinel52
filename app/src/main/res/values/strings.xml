@@ -10,7 +10,7 @@
 
     <!-- 常驻通知 -->
     <string name="notif_title">Sentinela de paquetes · Vigilando</string>
-    <string name="notif_title_degraded">包名哨兵 · Backend privilegiado no disponible</string>
+    <string name="notif_title_degraded">Sentinela de paquetes · Backend no disponible</string>
     <string name="notif_idle">Iniciado; esperando el primer análisis</string>
     <string name="notif_running">Vigilando · %1$d desinstaladas</string>
     <string name="notif_degraded">Sin backend disponible · %1$d coincidencias sin procesar en esta ronda (%2$d desinstaladas)</string>
@@ -21,7 +21,7 @@
 
     <!-- 日志 -->
     <string name="log_monitor_started">Vigilancia iniciada</string>
-    <string name="log_monitor_stopped">监控已Detener</string>
+    <string name="log_monitor_stopped">Vigilancia detenida</string>
     <string name="log_dry_run">Modo prueba: regla coincidente, sin desinstalar</string>
     <string name="log_protected">Regla coincidente, pero el paquete está protegido (sistema / componente privilegiado); omitido</string>
     <string name="log_self">La regla coincide con esta propia app; omitido</string>
