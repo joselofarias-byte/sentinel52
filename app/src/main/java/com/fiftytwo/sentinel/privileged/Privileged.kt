@@ -142,7 +142,7 @@ object Privileged {
         when (kind ?: activeKind ?: kindOfInstalledManager(context)) {
             BackendKind.ROOT -> {
                 val (ok, detail) = RootService.requestRoot(context.applicationContext)
-                SentinelStore.log(if (ok) EventKind.INFO else EventKind.ERROR, detail = "Root 授权：$detail")
+                SentinelStore.log(if (ok) EventKind.INFO else EventKind.ERROR, detail = "Autorización Root: $detail")
             }
 
             BackendKind.DHIZUKU -> DhizukuService.requestPermission { notifyListeners() }
@@ -183,13 +183,13 @@ object Privileged {
                 val command = UninstallCommand.build(packageName, allUsers)
                 val result = StellarService.shell(command)
                 when {
-                    result == null -> false to "Stellar｜不可用（服务未运行，或无法启动特权进程）"
+                    result == null -> false to "Stellar | No disponible (el servicio no está activo o no se pudo iniciar el proceso privilegiado)"
                     result.ok -> true to "Stellar｜$command → ${result}"
                     else -> false to "Stellar｜$command → ${result}"
                 }
             }
 
-            null -> false to "无可用后端（Root / Dhizuku / Stellar 均不可用）"
+            null -> false to "Sin backend disponible (Root / Dhizuku / Stellar no están disponibles)"
         }
 
     /** 还没探测过时，用「哪个后端装了」来猜一个目标（授权用），顺序同优先级。 */
